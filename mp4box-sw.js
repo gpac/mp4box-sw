@@ -5,12 +5,10 @@ importScripts('mp4box.all.js');
 // Set the callback for the install step
 self.addEventListener('install', function(event) {
 	console.log("[mp4box-sw] Installed");
-    // Perform install steps
-	console.log(event);
 });
 
 self.addEventListener('activate', function(event) {
-  console.log("[mp4box-sw] activated");
+	console.log("[mp4box-sw] activated");
 });
 
 function createResponse(type, data) {
