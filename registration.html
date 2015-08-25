@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+	<!-- JavaScript code to install a service worker -->
+	<script type="application/ecmascript">
+	if ('serviceWorker' in navigator) {
+	  navigator.serviceWorker.register('./mp4box-sw.js').then(function(registration) {
+	    // Registration was successful
+	    console.log('ServiceWorker registration successful with scope: ',    registration.scope);
+	  }).catch(function(err) {
+	    // registration failed :(
+	    console.log('ServiceWorker registration failed: ', err);
+	  });
+	}
+	</script>
+	<body>
+	</body>
+</html>
