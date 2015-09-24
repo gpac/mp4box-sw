@@ -18,7 +18,12 @@ function createResponse(type, data) {
 	// the response already has a content-type = text/plain, we need to remove it and replace it with svg
 	response.headers.delete('Content-Type');
 	response.headers.append('Content-Type', type);
-	return response;	
+	var r = response.clone();
+	console.log("[mp4box-sw] Response: ", response);
+	response.headers.forEach(function(value, key) {
+		console.log("[mp4box-sw]    "+key +": "+value);
+	});
+	return r;	
 }
 
 /* Cache of MP4Box instances by URL */
@@ -36,6 +41,7 @@ self.addEventListener('fetch', function(event) {
 
 	/* Closure-bound variable holding the MP4Box object for use in Promise onFullfilled callbacks */
 	var mp4box;
+	var builtResponse = null;
 
 	function fetchPromiseSuccessCallback(response) {
 		console.log("[mp4box-sw] Received response for URL:", response.url);
@@ -53,7 +59,7 @@ self.addEventListener('fetch', function(event) {
 			console.log("[mp4box-sw] Creating MP4Box instance for "+ req.url);
 			mp4box = new MP4Box(true, false);
 			urlToMP4Box[req.url] = mp4box;
-			mp4box.originalResponse = response;
+			mp4box.originalResponse = response.clone();
 			return response.arrayBuffer();
 		} else {
 			return response;
@@ -75,8 +81,8 @@ self.addEventListener('fetch', function(event) {
 				ok = true;
 			} 
 			if (!ok) {
-				console.log("[mp4box-sw] Could not find useful resource, sending the original response");
-				arrayBufferResponse = mp4box.originalResponse;
+				console.warn("[mp4box-sw] Could not find useful resource, sending the original response");
+				arrayBufferResponse = mp4box.originalResponse.clone();
 			}
 			return arrayBufferResponse;
 		} else {
@@ -93,27 +99,37 @@ self.addEventListener('fetch', function(event) {
 		console.log("[mp4box-sw] There is an MP4Box instance for the referrer of this resource");
 		if (req.url == req.referrer) {
 			console.log("[mp4box-sw] The MP4Box instance was created for this resource, sending the original response");
-			return mp4box.originalResponse;
+			return mp4box.originalResponse.clone();
 		} else {
 			/* The requested URL is different from the MP4 referer */
 			console.log("[mp4box-sw] Check if this MP4Box has an item for this resource");
-			item_name = req.url.substring(req.url.lastIndexOf('/')+1);
+			var i;
+			for (i = 0; i < req.url.length; i++) {
+				if (req.url.charAt(i) !== req.referrer.charAt(i)) {
+					break;
+				}
+			}
+			item_name = req.url.substring(i);
 			item_id = mp4box.inputIsoFile.hasItem(item_name);
 			if (item_id == -1) {
-				console.log("[mp4box-sw] Could not find item "+item_name+" in MP4");
+				console.warn("[mp4box-sw] Could not find item "+item_name+" in MP4");
 				/* continue to issue the fetch for the resource */
 			} else {
-				return createResponseFromItemId(mp4box, item_id);
+				builtResponse = createResponseFromItemId(mp4box, item_id, item_name);
 			}
 		}	
 	} 
 
-	console.log("[mp4box-sw] Fetching resource");
-	event.respondWith(fetch(event.request).then(fetchPromiseSuccessCallback).then(arrayBufferPromiseSuccessCallback));
+	if (builtResponse) {
+		event.respondWith(builtResponse);
+	} else {
+		console.log("[mp4box-sw] Fetching resource");
+		event.respondWith(fetch(event.request).then(fetchPromiseSuccessCallback).then(arrayBufferPromiseSuccessCallback));
+	}
 });
 
-function createResponseFromItemId(mp4box, item_id) {	
+function createResponseFromItemId(mp4box, item_id, item_name) {	
 	var item = mp4box.inputIsoFile.getItem(item_id);
-	console.log("[mp4box-sw] Found item "+item_id+" in MP4 of type "+item.content_type);
+	console.log("[mp4box-sw] Found item "+item_id+" in MP4 of type "+item.content_type+" for item of name: "+item_name);
 	return createResponse(item.content_type, item.data.buffer);
 }
