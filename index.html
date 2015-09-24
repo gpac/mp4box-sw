@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+
+    <title>MP4 Service Worker</title>
+
+    <script>
+      // Service workers require HTTPS (http://goo.gl/lq4gCo). If we're running on a real web server
+      // (as opposed to localhost on a custom port, which is whitelisted), then change the protocol to HTTPS.
+      if ((!location.port || location.port == "80") && location.protocol != 'https:') {
+        location.protocol = 'https:';
+      }
+    </script>
+
+  </head>
+
+  <body>
+    <h1>MP4 Service Worker</h1>
+
+    <div>
+     <a href="https://github.com/gpac/mp4box-sw"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png" alt="Fork me on GitHub" ></a>
+          <!-- GitHub Stat Buttons -->
+          <div style="position: absolute; top: 10px; right: 150px; border: 0;" >
+            <a class="github-button" href="https://github.com/gpac/mp4box-sw" data-style="mega" data-count-href="/gpac/mp4box-sw/stargazers" data-count-api="/repos/gpac/mp4box-sw#stargazers_count">Star</a>
+            <a class="github-button" href="https://github.com/gpac/mp4box-sw/fork" data-style="mega" data-count-href="/gpac/mp4box-sw/network" data-count-api="/repos/gpac/mp4box-sw#forks_count">Fork</a>
+            <a class="github-button" href="https://github.com/gpac/mp4box-sw" data-style="mega" data-count-href="/gpac/mp4box-sw/watchers" data-count-api="/repos/gpac/mp4box.js#subscribers_count">Watch</a>
+            <script async defer id="github-bjs" src="https://buttons.github.io/buttons.js"></script>
+          </div>
+    </div>
+
+    <p>
+      This page demonstrates the use of <a href="github.com/gpac/mp4box.js">MP4Box.js</a> as a Service Worker. 
+    </p>
+    <p>
+      By loading this page in Chrome, you have registered a Service Worker for the scope './'. You can check the registration using <a href="chrome://serviceworker-internals/">chrome://serviceworker-internals/</a>.
+    </p>
+    <div class="output">
+      <p>service worker registration: <strong id="status"></strong></p>
+    </div>
+
+    <p>
+      This Service Worker intercepts requests to resources in the scipe, checks if the response is an MP4 file. If so, it parses it and determines if there is HTML content in the MP4 file (stored as a primary item in a 'meta' box whose handler is 'html'). If so, the Service Worker forwards first the HTML content to the browser. All further requests made by the browser (because referenced from the HTML page) will be checked by the Service Worker to see if the resource is in the MP4 file. The MP4 file acts as a package for resources associated to the MP4 file.
+    </p>
+
+    <p>Example videos:</p>
+    <ul>
+    <li><a href="video.mp4">Basic HTML/CSS/Video</a></li>
+    <li><a href="Anand-Carlsen2014.mp4">Chess Example: Video and Graphics</a></li>
+    </ul>
+
+  <script type="application/ecmascript">
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./mp4box-sw.js', {scope: './'}).then(function(registration) {
+      // Registration was successful
+      console.log('ServiceWorker registration successful with scope: ',    registration.scope);
+      document.querySelector('#status').textContent = 'succeeded';
+    }).catch(function(err) {
+      // registration failed :(
+      console.log('ServiceWorker registration failed: ', err);
+      document.querySelector('#status').textContent = error;
+    });
+  }
+  </script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-61118998-4', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+  </body>
+</html>
