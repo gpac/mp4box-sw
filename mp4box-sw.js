@@ -51,9 +51,11 @@ self.addEventListener('fetch', function(event) {
 	function fetchPromiseSuccessCallback(response) {
 		console.log("[mp4box-sw] Received response for URL:", response.url);
 		console.log("[mp4box-sw] Response object:", response);
-		response.headers.forEach(function(value, key) {
-			console.log("[mp4box-sw]    "+ key +": "+value);
-		});
+		if (response.headers.forEach) {
+			response.headers.forEach(function(value, key) {
+				console.log("[mp4box-sw]    "+ key +": "+value);
+			});
+		}
 
 		/* if the response is an MP4 file, get an ArrayBuffer of it and inspect it 
 		   otherwise simply return the response
