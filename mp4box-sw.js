@@ -20,9 +20,11 @@ function createResponse(type, data) {
 	response.headers.append('Content-Type', type);
 	var r = response.clone();
 	console.log("[mp4box-sw] Response: ", response);
-	response.headers.forEach(function(value, key) {
-		console.log("[mp4box-sw]    "+key +": "+value);
-	});
+	if (response.headers.forEach) {
+		response.headers.forEach(function(value, key) {
+			console.log("[mp4box-sw]    "+key +": "+value);
+		});
+	}
 	return r;	
 }
 
@@ -35,9 +37,12 @@ self.addEventListener('fetch', function(event) {
 	var req = event.request.clone();	
 	console.log("[mp4box-sw] Fetch request received for URL:", req.url);
 	console.log("[mp4box-sw] Request object:", req);
-	req.headers.forEach(function(value, key) {
-		console.log("[mp4box-sw]    "+key +": "+value);
-	});
+	if (req.headers.forEach) {
+		req.headers.forEach(function(value, key) {
+			console.log("[mp4box-sw]    "+key +": "+value);
+		});
+	}
+
 
 	/* Closure-bound variable holding the MP4Box object for use in Promise onFullfilled callbacks */
 	var mp4box;
