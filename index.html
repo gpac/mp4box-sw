@@ -58,7 +58,7 @@
     }).catch(function(err) {
       // registration failed :(
       console.log('ServiceWorker registration failed: ', err);
-      document.querySelector('#status').textContent = error;
+      document.querySelector('#status').textContent = err;
     });
   }
   </script>
